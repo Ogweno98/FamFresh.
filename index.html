@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FamFresh — Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-white min-h-screen flex flex-col">
+
+  <header class="bg-green-700 text-white py-4 shadow">
+    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+      <h1 class="font-bold text-xl">FamFresh</h1>
+      <div class="flex gap-3">
+        <a href="login.html" class="underline">Login</a>
+        <a href="register.html" class="underline">Register</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-6xl mx-auto px-4 py-12 text-center">
+    <h2 class="text-3xl font-bold mb-4">Fresh produce delivered to your doorstep</h2>
+    <p class="text-gray-700 mb-6">Buy directly from farmers or manage your farm with FamFresh dashboard.</p>
+    <div class="flex justify-center gap-4">
+      <a href="marketplace.html" class="bg-green-700 text-white px-6 py-3 rounded shadow hover:bg-green-800 transition">Shop Now</a>
+      <a href="register.html" class="bg-yellow-500 text-white px-6 py-3 rounded shadow hover:bg-yellow-600 transition">Join as Farmer</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-100 py-6 mt-auto text-center text-gray-600 text-sm">
+    &copy; 2025 FamFresh. All rights reserved.
+  </footer>
+
+  <div id="chatbot-root"></div>
+
+  <script src="firebase-init.js"></script>
+  <script src="app.js"></script>
+  <script src="chatbot.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My Cart — FamFresh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen bg-gray-50">
+
+  <div class="bg-white shadow sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="rounded-full bg-green-600 w-10 h-10 flex items-center justify-center text-white font-bold">FF</div>
+        <div>
+          <h1 class="font-bold text-lg">FamFresh</h1>
+          <p class="text-xs text-gray-500">Shopping Cart</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="marketplace.html" class="text-sm text-green-700">Continue Shopping</a>
+        <button id="logoutBtn" class="text-sm text-red-600">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <h2 class="text-xl font-bold mb-4">My Cart</h2>
+    <div id="cartWrap" class="space-y-3"></div>
+  </main>
+
+  <div id="chatbot-root"></div>
+
+  <script src="firebase-init.js"></script>
+  <script src="app.js"></script>
+  <script src="chatbot.js"></script>
+
+  <script>
+    // Auth guard
+    appAuth.onAuthStateChanged(user => { if(!user) location.href='login.html'; });
+
+    // Render cart
+    function renderCart(){
+      const wrap = document.getElementById('cartWrap');
+      const items = JSON.parse(localStorage.getItem('cart')||'[]');
+      if(items.length===0){ wrap.innerHTML='<div class="text-gray-600">Your cart is empty. <a href="marketplace.html" class="text-green-700">Shop now</a></div>'; return; }
+      let html = '';
+      let total = 0;
+      items.forEach((it,idx)=>{
+        total += it.price*it.quantity;
+        html += `
+          <div class="flex justify-between items-center border rounded p-3">
+            <div class="flex items-center gap-3">
+              <img src="${it.image||''}" class="w-20 h-20 object-cover rounded">
+              <div>
+                <div class="font-semibold">${it.name}</div>
+                <div class="text-sm text-gray-600">KES ${it.price} x ${it.quantity}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="delBtn text-red-600" data-idx="${idx}">Remove</button>
+            </div>
+          </div>`;
+      });
+      html += `<div class="mt-4 text-right font-bold">Total: KES ${total}</div>
+               <div class="mt-2 text-right"><button id="checkoutBtn" class="bg-green-700 text-white px-4 py-2 rounded">Checkout</button></div>`;
+      wrap.innerHTML = html;
+
+      document.querySelectorAll('.delBtn').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const arr = JSON.parse(localStorage.getItem('cart')||'[]');
+          arr.splice(Number(b.dataset.idx),1);
+          localStorage.setItem('cart',JSON.stringify(arr));
+          renderCart();
+        });
+      });
+
+      document.getElementById('checkoutBtn').addEventListener('click', ()=>{
+        const cart = JSON.parse(localStorage.getItem('cart')||'[]');
+        if(cart.length===0) return alert('Cart empty');
+        alert(`Demo checkout: ${cart.length} items, total KES ${total}`);
+      });
+    }
+
+    renderCart();
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{ appAuth.logout(); location.href='login.html'; });
+  </script>
+</body>
+</html>

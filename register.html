@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Register — FamFresh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white p-8 rounded shadow w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">Register</h1>
+    <form id="registerForm" class="space-y-4">
+      <input type="text" id="name" placeholder="Full Name" required class="w-full border p-2 rounded">
+      <input type="email" id="email" placeholder="Email" required class="w-full border p-2 rounded">
+      <input type="password" id="password" placeholder="Password" required class="w-full border p-2 rounded">
+      <select id="role" class="w-full border p-2 rounded">
+        <option value="buyer">Buyer</option>
+        <option value="farmer">Farmer</option>
+      </select>
+      <button class="w-full bg-green-700 text-white py-2 rounded">Register</button>
+    </form>
+    <p class="mt-4 text-sm text-gray-600 text-center">Already have an account? <a href="login.html" class="text-green-700 underline">Login</a></p>
+  </div>
+
+  <script src="firebase-init.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const name=document.getElementById('name').value;
+      const email=document.getElementById('email').value;
+      const password=document.getElementById('password').value;
+      const role=document.getElementById('role').value;
+      const res = await appAuth.register({name,email,password,role});
+      if(res.success){
+        if(role==='farmer') location.href='farmer-dashboard.html';
+        else location.href='buyer-dashboard.html';
+      } else {
+        alert(res.message);
+      }
+    });
+  </script>
+</body>
+</html>

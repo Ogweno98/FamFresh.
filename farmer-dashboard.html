@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Farmer Dashboard — FamFresh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen bg-gray-50">
+
+  <div class="bg-white shadow sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="rounded-full bg-green-600 w-10 h-10 flex items-center justify-center text-white font-bold">FF</div>
+        <div>
+          <h1 class="font-bold text-lg">FamFresh</h1>
+          <p class="text-xs text-gray-500">Farmer Dashboard</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="cart.html" class="text-sm">Cart (<span id="cartCount">0</span>)</a>
+        <button id="logoutBtn" class="text-sm text-red-600">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="md:col-span-2">
+        <div class="bg-white p-4 rounded shadow">
+          <h3 class="font-semibold">My Listings</h3>
+          <div id="myProducts" class="mt-4 grid sm:grid-cols-2 gap-4"></div>
+        </div>
+        <div class="mt-6 bg-white p-4 rounded shadow">
+          <h4 class="font-semibold">Recent Orders</h4>
+          <div id="ordersList" class="mt-3 text-sm text-gray-700"></div>
+        </div>
+      </div>
+      <aside>
+        <div class="bg-white p-4 rounded shadow">
+          <h4 class="font-semibold">Add Product</h4>
+          <form id="productForm" class="mt-3 space-y-2">
+            <input id="pname" placeholder="Product name" class="w-full border p-2 rounded">
+            <input id="pprice" type="number" placeholder="Price (KES)" class="w-full border p-2 rounded">
+            <input id="punit" placeholder="Unit (kg, bunch...)" class="w-full border p-2 rounded">
+            <select id="pcat" class="w-full border p-2 rounded">
+              <option>Vegetables</option>
+              <option>Fruits</option>
+              <option>Grains</option>
+            </select>
+            <input id="pdesc" placeholder="Short description" class="w-full border p-2 rounded">
+            <input id="pfile" type="file" accept="image/*" class="w-full">
+            <button class="w-full bg-green-700 text-white py-2 rounded">Add Product</button>
+          </form>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div id="chatbot-root"></div>
+
+  <script src="firebase-init.js"></script>
+  <script src="app.js"></script>
+  <script src="chatbot.js"></script>
+
+  <script>
+    // Auth guard
+    appAuth.onAuthStateChanged(user => { if(!user) location.href='login.html'; });
+
+    // Render farmer's products
+    async function renderMyProducts(){
+      const ct=document.getElementById('myProducts'); ct.innerHTML='';
+      const prods = await appData.getProducts();
+      const email = firebase.auth().currentUser.email;
+      prods.filter(p=>p.owner===email).forEach(p=>{
+        const el=document.createElement('div'); el.className='p-3 border rounded';
+        el.innerHTML=`
+          <img src="${p.image||''}" class="h-28 w-full object-cover rounded">
+          <h4 class="mt-2 font-semibold">${p.name}</h4>
+          <div class="text-sm text-gray-600">KES ${p.price} / ${p.unit||'kg'}</div>
+          <div class="mt-2 flex gap-2">
+            <button class="editBtn border px-2 py-1 rounded">Edit</button>
+            <button class="delBtn border px-2 py-1 rounded text-red-600">Delete</button>
+          </div>`;
+        ct.appendChild(el);
+
+        el.querySelector('.delBtn').addEventListener('click', async ()=>{ await appData.removeProduct(p.id); renderMyProducts(); });
+        el.querySelector('.editBtn').addEventListener('click', async ()=>{
+          const newPrice = prompt('New price (KES)',p.price);
+          if(newPrice) { await appData.updateProduct(p.id,{price:Number(newPrice)}); renderMyProducts(); }
+        });
+      });
+    }
+
+    document.getElementById('productForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const name=document.getElementById('pname').value.trim();
+      const price=Number(document.getElementById('pprice').value||0);
+      const unit=document.getElementById('punit').value||'kg';
+      const cat=document.getElementById('pcat').value;
+      const desc=document.getElementById('pdesc').value;
+      const file=document.getElementById('pfile').files[0];
+      let img='';
+      if(file){
+        img = await new Promise(res=>{
+          const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file);
+        });
+      }
+      await appData.addProduct({name,price,unit,category:cat,description:desc,imageDataUrl:img,ownerEmail:firebase.auth().currentUser.email});
+      document.getElementById('productForm').reset();
+      renderMyProducts();
+      alert('Product added');
+    });
+
+    renderMyProducts();
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{ appAuth.logout(); location.href='login.html'; });
+  </script>
+</body>
+</html>
+         
