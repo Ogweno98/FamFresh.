@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center">
-
   <div class="bg-white p-8 rounded shadow w-full max-w-md">
     <h1 class="text-2xl font-bold mb-6 text-center">FamFresh Login</h1>
     <form id="loginForm" class="space-y-4">
@@ -15,23 +14,32 @@
       <input type="password" id="password" placeholder="Password" required class="w-full border p-2 rounded">
       <button class="w-full bg-green-700 text-white py-2 rounded">Login</button>
     </form>
-    <p class="mt-4 text-sm text-gray-600 text-center">Don't have an account? <a href="register.html" class="text-green-700 underline">Register</a></p>
+    <p class="mt-4 text-sm text-gray-600 text-center">
+      Don't have an account?
+      <a href="register.html" class="text-green-700 underline">Register</a>
+    </p>
   </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
   <script src="firebase-init.js"></script>
   <script src="app.js"></script>
+
   <script>
-    document.getElementById('loginForm').addEventListener('submit', async e=>{
+    document.getElementById('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const email=document.getElementById('email').value;
-      const password=document.getElementById('password').value;
-      const res = await appAuth.login(email,password);
-      if(res.success){
-        const doc = await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).get();
-        const role = doc.exists?doc.data().role:'buyer';
-        if(role==='farmer') location.href='farmer-dashboard.html';
-        else if(role==='admin') location.href='admin-dashboard.html';
-        else location.href='buyer-dashboard.html';
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const res = await appAuth.login(email, password);
+
+      if (res.success) {
+        if (res.role === 'farmer') location.href = 'farmer-dashboard.html';
+        else if (res.role === 'admin') location.href = 'admin-dashboard.html';
+        else location.href = 'buyer-dashboard.html';
       } else {
         alert(res.message);
       }
